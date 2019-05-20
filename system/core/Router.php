@@ -293,12 +293,35 @@ class CI_Router {
 		{
 			show_error('Unable to determine what should be displayed. A default route has not been specified in the routing file.');
 		}
+        /**
+         * if里为自己修改的部分
+         * 1.截取default_controller为数组
+         * 2.如果default_controller_arr大于3 表示是默认控制器过来的
+         * 3.赋值相应的变量
+         */
+        $default_controller_arr = explode('/', $this->default_controller);
+        if(count($default_controller_arr) == 3) {
+            // 赋值控制器所在目录
+            $this->directory = trim($default_controller_arr[0], '/') . '/';
+            // 赋值控制器名
+            $class = $default_controller_arr[1];
+            // 因为这里计划约定默认控制器输入完整uri 即目录名/控制器名/方法名的形式
+            // 所以方法名这里一定不为空
+            $method = $default_controller_arr[2];
+
+        }else {
+            // Is the method being specified?
+            if (sscanf($this->default_controller, '%[^/]/%s', $class, $method) !== 2)
+            {
+                $method = 'index';
+            }
+        }
 
 		// Is the method being specified?
-		if (sscanf($this->default_controller, '%[^/]/%s', $class, $method) !== 2)
-		{
-			$method = 'index';
-		}
+//		if (sscanf($this->default_controller, '%[^/]/%s', $class, $method) !== 2)
+//		{
+//			$method = 'index';
+//		}
 
 		if ( ! file_exists(APPPATH.'controllers/'.$this->directory.ucfirst($class).'.php'))
 		{
@@ -486,14 +509,15 @@ class CI_Router {
 	 */
 	public function set_directory($dir, $append = FALSE)
 	{
-		if ($append !== TRUE OR empty($this->directory))
-		{
-			$this->directory = str_replace('.', '', trim($dir, '/')).'/';
-		}
-		else
-		{
-			$this->directory .= str_replace('.', '', trim($dir, '/')).'/';
-		}
+        $this->directory = str_replace(array('.'), '', rtrim($dir, '/')).'/';
+//		if ($append !== TRUE OR empty($this->directory))
+//		{
+//			$this->directory = str_replace('.', '', trim($dir, '/')).'/';
+//		}
+//		else
+//		{
+//			$this->directory .= str_replace('.', '', trim($dir, '/')).'/';
+//		}
 	}
 
 	// --------------------------------------------------------------------
